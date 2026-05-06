@@ -1,68 +1,40 @@
 # silver-svc-billing-mesh
 
-`silver-svc-billing-mesh` treats backend services as a local verification problem. The Kotlin implementation is intentionally narrow, but the fixtures and notes make the behavior explicit.
+`silver-svc-billing-mesh` keeps a focused Kotlin implementation around backend services. The project goal is to design a Kotlin verification harness for billing systems, covering format conversion, round-trip fixtures, and failure-oriented tests.
 
-## Silver Svc Billing Mesh Checkpoints
+## Problem It Tries To Make Smaller
 
-Treat the compact fixture as the contract and the extended examples as a scratchpad. The code should stay boring enough that a change in behavior is obvious from the test output.
+The point is to make a small domain rule concrete enough that a reader can change it and immediately see what broke.
 
-## Useful Pieces
+## Silver Svc Billing Mesh Review Notes
 
-- Includes extended examples for queue pressure, including `recovery` and `degraded`.
-- Documents bounded workers tradeoffs in `docs/operations.md`.
-- Runs locally with a single verification command and no external credentials.
-- Stores project constants and verification metadata in `metadata/project.json`.
-- Adds a repository audit script that checks structure before running the language verifier.
+For a quick review, compare `session drift` with `retry load` before reading the middle cases.
 
-## What This Is For
+## Working Pieces
 
-This is not a wrapper around a service. It is a self-contained project that shows how the model behaves when demand, capacity, latency, risk, and weight move in different directions.
+- `fixtures/domain_review.csv` adds cases for queue pressure and retry load.
+- `metadata/domain-review.json` records the same cases in structured form.
+- `config/review-profile.json` captures the read order and the two review questions.
+- `examples/silver-svc-billing-walkthrough.md` walks through the case spread.
+- The Kotlin code includes a review path for `session drift` and `retry load`.
+- `docs/field-notes.md` explains the strongest and weakest cases.
 
-## Project Layout
+## Design Notes
 
-- `src`: primary implementation
-- `tests`: verification harness
-- `fixtures`: compact golden scenarios
-- `examples`: expanded scenario set
-- `metadata`: project constants and verification metadata
-- `docs`: operations and extension notes
-- `scripts`: local verification and audit commands
+The fixture data drives the tests. The code stays thin, while `metadata/domain-review.json` and `config/review-profile.json` explain what each case is meant to protect.
 
-## Architecture Notes
+The added Kotlin path is deliberately direct, with fixtures doing most of the explaining.
 
-The core is a scoring model over demand, capacity, latency, risk, and weight. That keeps job state, retry rules, and queue pressure in one explicit decision path. The threshold is 176, with risk penalty 6, latency penalty 4, and weight bonus 4. The Kotlin version keeps data classes and model logic close together for a JVM-friendly core.
-
-## Local Workflow
+## Example Run
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify.ps1
 ```
 
-This runs the language-level build or test path against the compact fixture set.
+## Tests
 
-## Case Study
+The same command runs the local verification path. The highest-scoring domain case is `recovery` at 196, which lands in `ship`. The most cautious case is `stress` at 131, which lands in `watch`.
 
-`examples/extended_cases.csv` adds six named cases. I kept the names plain so failures are easy to read in a terminal: baseline, pressure, surge, degraded, recovery, and boundary.
+## Known Limits
 
-## Quality Gate
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/audit.ps1
-```
-
-The audit command checks repository structure and README constraints before it delegates to the verifier.
-
-## Scope
-
-This code is local-first. It makes no claim about deployed usage and avoids credentials, hosted state, and environment-specific setup.
-
-## Expansion Ideas
-
-- Split the scoring constants into a typed configuration object and validate it before use.
-- Add a comparison mode that shows how decisions change when one signal is adjusted.
-- Add a loader for `examples/extended_cases.csv` and promote selected cases into the language test suite.
-- Add one more backend services fixture that focuses on a malformed or borderline input.
-
-## Tooling
-
-The only required setup is the local Kotlin toolchain. After cloning, stay in the repo root so fixture paths resolve correctly.
+No external service is required. A deeper version would add more negative cases and a clearer boundary around invalid input.

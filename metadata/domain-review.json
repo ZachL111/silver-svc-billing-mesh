@@ -1,0 +1,73 @@
+{
+  "repo": "silver-svc-billing-mesh",
+  "language": "Kotlin",
+  "category": "Backend services",
+  "goal": "Design a Kotlin verification harness for billing systems, covering format conversion, round-trip fixtures, and failure-oriented tests.",
+  "review_model": {
+    "terms": [
+      "queue pressure",
+      "retry load",
+      "worker slack",
+      "session drift"
+    ],
+    "lanes": [
+      "ship",
+      "watch",
+      "hold"
+    ],
+    "score": "signal * 2 + slack + confidence - drag * 3",
+    "purpose": "surface the domain-specific cases that need the most careful review"
+  },
+  "cases": [
+    {
+      "name": "baseline",
+      "focus": "queue pressure",
+      "signal": 46,
+      "slack": 33,
+      "drag": 19,
+      "confidence": 82,
+      "score": 150,
+      "lane": "ship"
+    },
+    {
+      "name": "stress",
+      "focus": "retry load",
+      "signal": 54,
+      "slack": 53,
+      "drag": 32,
+      "confidence": 66,
+      "score": 131,
+      "lane": "watch"
+    },
+    {
+      "name": "edge",
+      "focus": "worker slack",
+      "signal": 78,
+      "slack": 26,
+      "drag": 25,
+      "confidence": 87,
+      "score": 194,
+      "lane": "ship"
+    },
+    {
+      "name": "recovery",
+      "focus": "session drift",
+      "signal": 78,
+      "slack": 48,
+      "drag": 21,
+      "confidence": 55,
+      "score": 196,
+      "lane": "ship"
+    },
+    {
+      "name": "stale",
+      "focus": "queue pressure",
+      "signal": 65,
+      "slack": 41,
+      "drag": 16,
+      "confidence": 72,
+      "score": 195,
+      "lane": "ship"
+    }
+  ]
+}
